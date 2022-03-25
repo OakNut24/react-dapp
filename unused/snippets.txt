@@ -1,2 +1,5 @@
 Deploy a contract to the localhost:
 npx hardhat run scripts/deploy.js --network localhost 
+
+Run a local blockchain network:
+npx hardhat node

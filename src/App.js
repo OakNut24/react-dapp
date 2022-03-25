@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { ethers } from 'hardhat';
+import { ethers } from 'ethers';
 
 import './App.css';
 import Greeter from './artifacts/contracts/Greeter.sol/Greeter.json';
 
-const greeterAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
-
+const greeterAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+// 
 function App() {
 
   const [greeting, setGreetingValue] = useState();
@@ -26,23 +26,27 @@ function App() {
     }
   }
   async function setGreeting() {
+    if (!greeting) return
+    if (typeof window.ethereum !== 'undefined') {
+      await requestAccount();
+      const provider = new ethers.providers.Web3Provider(window.ethereum); //this is the wallet(identifier)
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(greeterAddress, Greeter.abi, signer);
+      const transaction = await contract.setGreeting(greeting);
+      setGreeting('');//Reseting the local greeting value after the user has submitted
+      await transaction.wait();
+      fetchGreeting();
 
+    }
   }
 
   return (
     <div className="App">
       <header className="App-header">
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <button onClick={fetchGreeting}>Fetch Greeting</button>
+        <button onClick={setGreeting}>Set Greeting</button>
+        <input onChange={e => setGreetingValue(e.target.value)} placeholder="Set greeting" value={greeting} />
+
       </header>
     </div>
   );
